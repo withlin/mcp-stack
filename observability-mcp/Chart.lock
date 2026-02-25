@@ -1,0 +1,9 @@
+dependencies:
+- name: grafana-mcp
+  repository: https://grafana-community.github.io/helm-charts
+  version: 0.7.2
+- name: mcp-victoriametrics
+  repository: file://charts/mcp-victoriametrics
+  version: 0.1.0
+digest: sha256:832554366cfe79380eb1c41452e41aaa0c40d923452f035769ca02c05edd5e11
+generated: "2026-02-25T07:17:50.538500734Z"

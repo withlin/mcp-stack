@@ -1,0 +1,27 @@
+apiVersion: v2
+name: observability-mcp
+description: Umbrella Helm chart for observability MCP servers (Grafana MCP + VictoriaMetrics MCP)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: "^1.25.0-0"
+keywords:
+  - monitoring
+  - observability
+  - mcp
+  - grafana
+  - victoriametrics
+sources:
+  - https://github.com/grafana/mcp-grafana
+  - https://github.com/VictoriaMetrics-Community/mcp-victoriametrics
+dependencies:
+  # Official Grafana MCP chart from the community Helm repo
+  - name: grafana-mcp
+    version: "0.7.2"
+    repository: "https://grafana-community.github.io/helm-charts"
+    condition: grafana-mcp.enabled
+  # Official VictoriaMetrics MCP chart (vendored locally, not yet published to a Helm repo)
+  - name: mcp-victoriametrics
+    version: "0.1.0"
+    repository: "file://charts/mcp-victoriametrics"
+    condition: mcp-victoriametrics.enabled

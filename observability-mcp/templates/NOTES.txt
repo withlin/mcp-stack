@@ -1,0 +1,26 @@
+============================================================
+  Observability MCP Stack has been deployed!
+============================================================
+
+Enabled components:
+{{- if index .Values "grafana-mcp" "enabled" }}
+  - Grafana MCP Server (port {{ index .Values "grafana-mcp" "service" "port" }})
+{{- end }}
+{{- if index .Values "mcp-victoriametrics" "enabled" }}
+  - VictoriaMetrics MCP Server (port {{ index .Values "mcp-victoriametrics" "service" "port" }})
+{{- end }}
+
+To verify the deployment:
+  kubectl get pods -l "app.kubernetes.io/managed-by=Helm" -n {{ .Release.Namespace }}
+
+{{- if index .Values "grafana-mcp" "enabled" }}
+
+--- Grafana MCP ---
+  kubectl port-forward svc/{{ .Release.Name }}-grafana-mcp {{ index .Values "grafana-mcp" "service" "port" }}:{{ index .Values "grafana-mcp" "service" "port" }} -n {{ .Release.Namespace }}
+{{- end }}
+
+{{- if index .Values "mcp-victoriametrics" "enabled" }}
+
+--- VictoriaMetrics MCP ---
+  kubectl port-forward svc/{{ .Release.Name }}-mcp-victoriametrics {{ index .Values "mcp-victoriametrics" "service" "port" }}:{{ index .Values "mcp-victoriametrics" "service" "port" }} -n {{ .Release.Namespace }}
+{{- end }}

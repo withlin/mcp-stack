@@ -1,0 +1,35 @@
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/grafana-community/helm-charts
+    - name: Upstream Project
+      url: https://github.com/grafana/mcp-grafana
+apiVersion: v2
+appVersion: 0.11.1
+description: MCP server for Grafana.
+home: https://grafana.com
+icon: https://artifacthub.io/image/b4fed1a7-6c8f-4945-b99d-096efa3e4116
+keywords:
+- monitoring
+- mcp
+kubeVersion: ^1.25.0-0
+maintainers:
+- email: sheikhabubaker761@gmail.com
+  name: Mohammad Abubaker
+  url: https://github.com/Sheikh-Abubaker
+- email: github@jkroepke.de
+  name: Jan-Otto Kröpke
+  url: https://github.com/jkroepke
+- email: avivguiser@gmail.com
+  name: Aviv Guiser
+  url: https://github.com/KyriosGN0
+- email: quentin.bisson@gmail.com
+  name: Quentin Bisson
+  url: https://github.com/QuentinBisson
+name: grafana-mcp
+sources:
+- https://github.com/grafana/mcp-grafana
+- https://github.com/grafana-community/helm-charts
+type: application
+version: 0.7.2

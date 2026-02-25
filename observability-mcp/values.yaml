@@ -1,0 +1,249 @@
+# ============================================================================
+# Observability MCP Stack - Unified Values
+# ============================================================================
+# This umbrella chart deploys official MCP servers for Grafana and VictoriaMetrics.
+# Each subchart can be independently enabled/disabled and configured.
+#
+# Values are passed to subcharts using the subchart name as the key prefix.
+# See each upstream chart for the full set of configurable options:
+#   - grafana-mcp:          https://github.com/grafana-community/helm-charts/tree/main/charts/grafana-mcp
+#   - mcp-victoriametrics:  https://github.com/VictoriaMetrics-Community/mcp-victoriametrics/tree/main/k8s/helm
+# ============================================================================
+
+# ------------------------------------------------------------------------------
+# Grafana MCP Server
+# Docs: https://github.com/grafana/mcp-grafana
+# ------------------------------------------------------------------------------
+grafana-mcp:
+  enabled: true
+
+  # -- Grafana connection settings (REQUIRED)
+  grafana:
+    # -- URL of your Grafana instance
+    url: "http://grafana:3000"
+    # -- Grafana service account token (plain text; chart will create a Secret)
+    apiKey: ""
+    # -- Or reference an existing Kubernetes Secret
+    apiKeySecret:
+      name: ""
+      key: ""
+
+  # -- Image configuration
+  image:
+    registry: docker.io
+    repository: grafana/mcp-grafana
+    tag: ""            # defaults to appVersion (0.11.1)
+    pullPolicy: IfNotPresent
+
+  # -- Number of replicas
+  replicas: 2
+
+  # -- Service configuration
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8000
+
+  # -- Ingress (disabled by default)
+  ingress:
+    enabled: false
+    # className: nginx
+    # hosts:
+    #   - host: mcp-grafana.example.com
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
+    # tls: []
+
+  # -- Enable debug mode
+  debug: false
+
+  # -- Disable specific MCP categories via --disable-<category> CLI flags
+  # Available categories:
+  #   search, datasource, incident, prometheus, loki, elasticsearch, alerting,
+  #   dashboard, folder, oncall, asserts, sift, admin, pyroscope, navigation,
+  #   proxied, annotations, rendering, cloudwatch, examples, clickhouse,
+  #   searchlogs, runpanelquery
+  #   write  -- cross-cutting: disables all create/update/delete operations
+  # Example:
+  #   disabledCategories:
+  #     - write        # read-only mode, no mutations allowed
+  #     - admin        # hide team/role/permission tools
+  #     - incident     # hide incident management tools
+  disabledCategories: []
+
+  # -- Additional command line arguments passed to mcp-grafana binary
+  # Can be used for whitelist mode with --enabled-tools (overrides default set)
+  # Default enabled: search,datasource,incident,prometheus,loki,alerting,
+  #   dashboard,folder,oncall,asserts,sift,pyroscope,navigation,proxied,
+  #   annotations,rendering
+  # Not enabled by default: elasticsearch,admin,cloudwatch,clickhouse,
+  #   examples,searchlogs,runpanelquery
+  # Example (whitelist mode - only enable specific categories):
+  #   extraArgs:
+  #     - --enabled-tools=search,datasource,prometheus,loki,dashboard
+  extraArgs: []
+
+  # -- Resource requests/limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # -- Container security context (secure defaults from upstream)
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- Health probes (grafana-mcp has no /health endpoint, use TCP socket)
+  livenessProbe:
+    tcpSocket:
+      port: mcp-http
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    tcpSocket:
+      port: mcp-http
+    initialDelaySeconds: 5
+    timeoutSeconds: 1
+    periodSeconds: 10
+
+  # -- Pod security context
+  securityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    seccompProfile:
+      type: RuntimeDefault
+
+# ------------------------------------------------------------------------------
+# VictoriaMetrics MCP Server
+# Docs: https://github.com/VictoriaMetrics-Community/mcp-victoriametrics
+# ------------------------------------------------------------------------------
+mcp-victoriametrics:
+  enabled: true
+
+  # -- VictoriaMetrics backend configuration (REQUIRED: set cloudAPIKey OR entrypoint)
+  vm:
+    # -- VictoriaMetrics Cloud API key (enables cloud mode)
+    cloudAPIKey: ""
+    # -- VM instance type: "single" or "cluster" (for self-hosted mode)
+    type: single
+    # -- VM entrypoint URL (required if cloudAPIKey is empty)
+    entrypoint: ""
+    # -- Bearer token for VM authentication (string or valueFrom map)
+    bearerToken: ""
+    # -- Custom HTTP headers
+    headers: []
+
+  # -- MCP server behavior
+  mcp:
+    mode: sse
+    disable:
+      tools: []
+      resources: false
+    heartbeatInterval: 30s
+
+  # -- Image configuration
+  image:
+    registry: ghcr.io
+    repository: victoriametrics-community/mcp-victoriametrics
+    tag: ""            # defaults to appVersion (1.15.0)
+    pullPolicy: IfNotPresent
+
+  # -- Number of replicas
+  replicaCount: 2
+
+  # -- Service configuration
+  service:
+    type: ClusterIP
+    port: 8080
+
+  # -- Ingress (disabled by default)
+  ingress:
+    enabled: false
+    # className: nginx
+    # hosts:
+    #   - host: mcp-vm.example.com
+    #     paths:
+    #       - path: /
+    #         pathType: ImplementationSpecific
+    # tls: []
+
+  # -- Gateway API HTTPRoute (disabled by default)
+  route:
+    enabled: false
+
+  # -- VMServiceScrape for VictoriaMetrics Operator (disabled by default)
+  scrape:
+    enabled: false
+
+  # -- Resource requests/limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # -- Pod security context
+  podSecurityContext:
+    fsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- Container security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seLinuxOptions:
+      level: "s0:c123,c456"
+    seccompProfile:
+      type: RuntimeDefault
+
+  # -- Health probes (sensible upstream defaults)
+  livenessProbe:
+    httpGet:
+      path: /health/liveness
+      port: http
+      scheme: HTTP
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health/readiness
+      port: http
+      scheme: HTTP
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 10
