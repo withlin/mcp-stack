@@ -268,9 +268,3 @@ helm dependency update ./observability-mcp
 helm dependency update ./observability-mcp
 ```
 
-## References
-
-- [grafana/mcp-grafana](https://github.com/grafana/mcp-grafana) — Grafana MCP server source
-- [grafana-community/helm-charts](https://github.com/grafana-community/helm-charts/tree/main/charts/grafana-mcp) — Official Grafana MCP Helm chart
-- [VictoriaMetrics-Community/mcp-victoriametrics](https://github.com/VictoriaMetrics-Community/mcp-victoriametrics) — VictoriaMetrics MCP server source
-- [VictoriaMetrics MCP Helm chart](https://github.com/VictoriaMetrics-Community/mcp-victoriametrics/tree/main/k8s/helm) — Official VM MCP Helm chart
