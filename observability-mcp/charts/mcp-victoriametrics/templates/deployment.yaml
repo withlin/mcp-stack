@@ -44,7 +44,10 @@ spec:
               value: "{{ .Values.mcp.mode }}"
             {{- if $isCloud }}
             - name: VMC_API_KEY
-              value: "{{ .Values.vm.cloudAPIKey }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mcp-victoriametrics.fullname" . }}
+                  key: cloud-api-key
             {{- else }}
             - name: VM_INSTANCE_ENTRYPOINT
               value: "{{ required "either .Values.vm.cloudAPIKey or .Values.vm.entrypoint should be set" .Values.vm.entrypoint }}"
@@ -55,13 +58,19 @@ spec:
               {{- if kindIs "map" . }}
               valueFrom: {{ toYaml . | nindent 16 }}
               {{- else }}
-              value: "{{ . }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mcp-victoriametrics.fullname" $ }}
+                  key: bearer-token
               {{- end }}
             {{- end }}
             {{- end }}
             {{- with .Values.vm.headers }}
             - name: VM_INSTANCE_HEADERS
-              value: "{{ join "," . }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mcp-victoriametrics.fullname" $ }}
+                  key: headers
             {{- end }}
             {{- with .Values.mcp.disable.resources }}
             - name: MCP_DISABLE_RESOURCES

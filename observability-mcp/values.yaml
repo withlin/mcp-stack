@@ -148,9 +148,19 @@ mcp-victoriametrics:
     type: single
     # -- VM entrypoint URL (required if cloudAPIKey is empty)
     entrypoint: ""
-    # -- Bearer token for VM authentication (string or valueFrom map)
+    # -- Bearer token for VM authentication
+    # Plain string (NOT recommended, token visible in pod spec):
+    #   bearerToken: "my-token"
+    # Reference an existing Secret (recommended):
+    #   bearerToken:
+    #     secretKeyRef:
+    #       name: vm-auth-secret
+    #       key: token
     bearerToken: ""
-    # -- Custom HTTP headers
+    # -- Custom HTTP headers (stored in Secret, not plaintext)
+    # Useful for Basic Auth when VM is behind Nginx:
+    #   headers:
+    #     - "Authorization: Basic dXNlcjpwYXNz"
     headers: []
 
   # -- MCP server behavior
