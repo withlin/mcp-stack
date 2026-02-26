@@ -133,20 +133,19 @@ resources: {}
   #   memory: 128Mi
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# NOTE: upstream defines httpGet /health/liveness & /health/readiness, but the server
+#       does NOT implement these endpoints (verified v1.15.0 ~ v1.18.0).
+#       Using TCP socket probe instead.
 livenessProbe:
-  httpGet:
-    path: /health/liveness
+  tcpSocket:
     port: http
-    scheme: HTTP
   initialDelaySeconds: 10
   timeoutSeconds: 1
   periodSeconds: 10
 readinessProbe:
-  httpGet:
-    path: /health/readiness
+  tcpSocket:
     port: http
-    scheme: HTTP
-  initialDelaySeconds: 10
+  initialDelaySeconds: 5
   timeoutSeconds: 1
   periodSeconds: 10
 

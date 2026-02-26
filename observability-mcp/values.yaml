@@ -240,20 +240,19 @@ mcp-victoriametrics:
     seccompProfile:
       type: RuntimeDefault
 
-  # -- Health probes (sensible upstream defaults)
+  # -- Health probes
+  # NOTE: upstream chart defines httpGet /health/liveness & /health/readiness,
+  #       but the server does NOT implement these endpoints (verified v1.15.0 ~ v1.18.0).
+  #       Using TCP socket probe instead.
   livenessProbe:
-    httpGet:
-      path: /health/liveness
+    tcpSocket:
       port: http
-      scheme: HTTP
     initialDelaySeconds: 10
     timeoutSeconds: 1
     periodSeconds: 10
   readinessProbe:
-    httpGet:
-      path: /health/readiness
+    tcpSocket:
       port: http
-      scheme: HTTP
-    initialDelaySeconds: 10
+    initialDelaySeconds: 5
     timeoutSeconds: 1
     periodSeconds: 10
